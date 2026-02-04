@@ -50,6 +50,23 @@ class Seed(AbstractPrecilaserDevice):
         else:
             raise ValueError("no status data bytes retrieved")
 
+    def save_status(self) -> None:
+        self._set_value(self.status.temperature_set,PrecilaserCommand.SEED_SET_TEMP,save=True)
+        message = self._read()
+        if message.payload is not None:
+            self._check_write_return(
+                message.payload[:2], setpoint, "temperature setpoint"
+            )
+        else:
+            raise ValueError(f"not saved to requested value: {setpoint}")
+
+        self._set_value(self.status.piezo_voltage,PrecilaserCommand.SEED_SET_VOLTAGE,save=True)
+        message = self._read()
+        if message.payload is not None:
+            self._check_write_return(message.payload[:2], setpoint, "piezo voltage")
+        else:
+            raise ValueError(f"not saved to requested value: {setpoint}")
+
     @property
     def temperature_setpoint(self) -> float:
         return self.status.temperature_set
